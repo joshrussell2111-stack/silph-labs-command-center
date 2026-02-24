@@ -13,6 +13,7 @@ const cron = require('node-cron');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+const HOST = process.env.HOST || '0.0.0.0';  // Allow local network access
 const WORKSPACE = process.env.WORKSPACE || '/Users/joshrussell/.openclaw/workspace';
 
 // Middleware
@@ -574,7 +575,7 @@ app.use((err, req, res, next) => {
 });
 
 // Start server
-const server = app.listen(PORT, () => {
+const server = app.listen(PORT, HOST, () => {
   console.log(`
 ╔══════════════════════════════════════════════════════════╗
 ║                                                          ║
@@ -582,8 +583,9 @@ const server = app.listen(PORT, () => {
 ║                                                          ║
 ║     Mission Control Server Running!                      ║
 ║                                                          ║
-║     📊 Dashboard: http://localhost:${PORT}                  ║
-║     🔌 API Endpoint: http://localhost:${PORT}/api/status    ║
+║     📊 Local Dashboard: http://localhost:${PORT}            ║
+║     🌐 Network Dashboard: http://${HOST}:${PORT}            ║
+║     🔌 API Endpoint: http://${HOST}:${PORT}/api/status      ║
 ║                                                          ║
 ║     Subagents monitored: ${Object.keys(SUBAGENTS).length}                              ║
 ║     Workspace: ${WORKSPACE}    ║
