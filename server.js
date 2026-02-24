@@ -416,16 +416,39 @@ cron.schedule('*/30 * * * * *', updateSystemState);
 app.get('/api/status', (req, res) => {
   const startTime = Date.now();
   
-  res.json({
-    success: true,
-    timestamp: new Date().toISOString(),
-    responseTime: Date.now() - startTime,
-    data: {
+  // In cloud mode, reload from data.json on each request for live updates
+  let data;
+  if (isCloudDeployment()) {
+    const syncedData = loadSyncedData();
+    if (syncedData) {
+      data = {
+        subagents: syncedData.subagents,
+        metrics: syncedData.metrics,
+        activityLog: syncedData.activityLog,
+        systemStatus: syncedData.systemStatus || 'ONLINE'
+      };
+    } else {
+      data = {
+        subagents: systemState.subagents,
+        metrics: systemState.metrics,
+        activityLog: systemState.activityLog,
+        systemStatus: systemState.metrics.gatewayStatus === 'online' ? 'ONLINE' : 'DEGRADED'
+      };
+    }
+  } else {
+    data = {
       subagents: systemState.subagents,
       metrics: systemState.metrics,
       activityLog: systemState.activityLog,
       systemStatus: systemState.metrics.gatewayStatus === 'online' ? 'ONLINE' : 'DEGRADED'
-    }
+    };
+  }
+  
+  res.json({
+    success: true,
+    timestamp: new Date().toISOString(),
+    responseTime: Date.now() - startTime,
+    data: data
   });
 });
 
