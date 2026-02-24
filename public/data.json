@@ -1,17 +1,17 @@
 {
   "success": true,
-  "timestamp": "2026-02-24T19:02:13.573Z",
-  "lastSync": 1771959733573,
+  "timestamp": "2026-02-24T19:04:14.935Z",
+  "lastSync": 1771959854935,
   "subagents": {
     "pixel": {
       "name": "PIXEL",
       "type": "WEB DESIGN",
       "icon": "🎨",
       "description": "UI/UX Design, Web Development, Visual Systems",
-      "activityLevel": 100,
+      "activityLevel": 75,
       "status": "active",
       "lastActive": "2026-02-24",
-      "hp": 100,
+      "hp": 75,
       "maxHp": 100,
       "skillLog": {
         "entries": [
@@ -205,15 +205,15 @@
       {
         "name": "data-sync",
         "schedule": "*/5 * * * *",
-        "lastRun": "2/24/2026, 2:02:13 PM",
-        "nextRun": "2/24/2026, 2:07:13 PM",
+        "lastRun": "2/24/2026, 2:04:14 PM",
+        "nextRun": "2/24/2026, 2:09:14 PM",
         "status": "active"
       }
     ],
     "skills": [],
     "contextUsage": {
       "model": "Claude Sonnet 4.5",
-      "tokensUsed": 38593,
+      "tokensUsed": 38378,
       "tokensTotal": 200000,
       "tokensRemaining": 0
     },
