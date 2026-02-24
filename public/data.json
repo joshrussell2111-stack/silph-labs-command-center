@@ -1,7 +1,7 @@
 {
   "success": true,
-  "timestamp": "2026-02-24T16:43:04.730Z",
-  "lastSync": 1771951384730,
+  "timestamp": "2026-02-24T16:43:29.720Z",
+  "lastSync": 1771951409720,
   "subagents": {
     "pixel": {
       "name": "PIXEL",
@@ -199,5 +199,131 @@
       "type": "task_complete"
     }
   ],
-  "systemStatus": "ONLINE"
+  "systemStatus": "ONLINE",
+  "widgets": {
+    "cronJobs": [
+      {
+        "name": "data-sync",
+        "schedule": "*/5 * * * *",
+        "lastRun": "2/24/2026, 11:43:29 AM",
+        "nextRun": "2/24/2026, 11:48:29 AM",
+        "status": "active"
+      }
+    ],
+    "skills": [],
+    "contextUsage": {
+      "model": "Claude Sonnet 4.5",
+      "tokensUsed": 40325,
+      "tokensTotal": 200000,
+      "tokensRemaining": 0
+    },
+    "modelRouter": {
+      "models": [
+        {
+          "name": "Kimi K2.5",
+          "provider": "Moonshot AI",
+          "icon": "🌙",
+          "status": "online",
+          "active": true
+        },
+        {
+          "name": "Claude Sonnet 4.5",
+          "provider": "Anthropic",
+          "icon": "🔷",
+          "status": "fallback",
+          "active": false
+        },
+        {
+          "name": "GPT-4o",
+          "provider": "OpenRouter",
+          "icon": "🔶",
+          "status": "fallback",
+          "active": false
+        }
+      ],
+      "routingLogic": "Auto-failover: Kimi → Claude → OpenRouter"
+    },
+    "recentReports": [
+      {
+        "title": "crdo-report",
+        "date": "2/24/2026",
+        "agent": "SYSTEM",
+        "icon": "📄",
+        "url": "/workspace/crdo-report.html",
+        "modified": "2026-02-24T14:42:26.499Z"
+      },
+      {
+        "title": "CRDO Analysis Report",
+        "date": "2/24/2026",
+        "agent": "📈 MERIDIAN",
+        "icon": "📊",
+        "url": "/workspace/CRDO_Analysis_Report.html",
+        "modified": "2026-02-24T14:41:13.598Z"
+      },
+      {
+        "title": "dashboard-styles-summary",
+        "date": "2/24/2026",
+        "agent": "🎨 PIXEL",
+        "icon": "🎨",
+        "url": "/workspace/dashboard-styles-summary.md",
+        "modified": "2026-02-24T14:06:46.012Z"
+      },
+      {
+        "title": "watchlist-analysis-2026-02-18",
+        "date": "2/18/2026",
+        "agent": "SYSTEM",
+        "icon": "📄",
+        "url": "/workspace/watchlist-analysis-2026-02-18.md",
+        "modified": "2026-02-18T19:14:49.884Z"
+      },
+      {
+        "title": "precious-metals-etp-analysis",
+        "date": "2/18/2026",
+        "agent": "SYSTEM",
+        "icon": "📄",
+        "url": "/workspace/precious-metals-etp-analysis.md",
+        "modified": "2026-02-18T16:15:33.629Z"
+      },
+      {
+        "title": "silver-squeeze-report",
+        "date": "2/17/2026",
+        "agent": "SYSTEM",
+        "icon": "📄",
+        "url": "/workspace/silver-squeeze-report.html",
+        "modified": "2026-02-17T14:21:27.770Z"
+      },
+      {
+        "title": "smr-report-pixel",
+        "date": "2/16/2026",
+        "agent": "SYSTEM",
+        "icon": "📄",
+        "url": "/workspace/smr-report-pixel.html",
+        "modified": "2026-02-17T00:48:24.541Z"
+      },
+      {
+        "title": "nvidia investment analysis professional",
+        "date": "2/14/2026",
+        "agent": "📈 MERIDIAN",
+        "icon": "📊",
+        "url": "/workspace/nvidia_investment_analysis_professional.pdf",
+        "modified": "2026-02-15T03:16:18.069Z"
+      },
+      {
+        "title": "nvidia report template",
+        "date": "2/14/2026",
+        "agent": "SYSTEM",
+        "icon": "📄",
+        "url": "/workspace/nvidia_report_template.html",
+        "modified": "2026-02-15T03:01:19.337Z"
+      },
+      {
+        "title": "CRDO Professional Investment Analysis",
+        "date": "2/14/2026",
+        "agent": "📈 MERIDIAN",
+        "icon": "📊",
+        "url": "/workspace/CRDO_Professional_Investment_Analysis.pdf",
+        "modified": "2026-02-15T02:37:07.926Z"
+      }
+    ]
+  }
 }

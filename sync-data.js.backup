@@ -148,134 +148,6 @@ function buildActivityLog(subagentsData) {
     .slice(0, 10);
 }
 
-function getCronJobs() {
-  try {
-    const { execSync } = require('child_process');
-    const crontab = execSync('crontab -l 2>/dev/null || echo ""', { encoding: 'utf8' });
-    const jobs = [];
-    
-    crontab.split('\n').filter(l => l.trim() && !l.startsWith('#')).forEach(line => {
-      const parts = line.trim().split(/\s+/);
-      if (parts.length >= 6) {
-        jobs.push({
-          name: parts.slice(5).join(' ').substring(0, 40),
-          schedule: parts.slice(0, 5).join(' '),
-          lastRun: 'Unknown',
-          nextRun: 'Calculating...',
-          status: 'active'
-        });
-      }
-    });
-    
-    if (jobs.length === 0) {
-      jobs.push({
-        name: 'data-sync',
-        schedule: '*/5 * * * *',
-        lastRun: new Date().toLocaleString(),
-        nextRun: new Date(Date.now() + 5*60*1000).toLocaleString(),
-        status: 'active'
-      });
-    }
-    
-    return jobs;
-  } catch (e) {
-    return [{
-      name: 'system-monitor',
-      schedule: '*/10 * * * *',
-      lastRun: 'N/A',
-      nextRun: 'N/A',
-      status: 'active'
-    }];
-  }
-}
-
-function getSkillsInventory() {
-  const skills = [];
-  const skillIcons = { finance: '💰', web: '🌐', visual: '🎨', data: '📊', email: '📧' };
-  
-  Object.entries(SUBAGENTS).forEach(([key, agent]) => {
-    if (!agent.skillLog) return;
-    const logPath = path.join(WORKSPACE, agent.skillLog);
-    if (!fs.existsSync(logPath)) return;
-    
-    try {
-      const content = fs.readFileSync(logPath, 'utf8');
-      const lines = content.split('\n');
-      
-      lines.forEach(line => {
-        const match = line.match(/(?:\*\*|-)?\s*([A-Z][a-zA-Z\s]+?)(?:\*\*)?/);
-        if (match && line.length < 80) {
-          const skillName = match[1].trim();
-          if (skillName.length > 3 && skillName.length < 40) {
-            let icon = '⚡';
-            for (const [key, val] of Object.entries(skillIcons)) {
-              if (skillName.toLowerCase().includes(key)) icon = val;
-            }
-            
-            skills.push({
-              name: skillName,
-              agent: agent.icon + ' ' + agent.name,
-              icon: icon,
-              category: 'SKILL',
-              description: skillName
-            });
-          }
-        }
-      });
-    } catch (e) {}
-  });
-  
-  return skills.slice(0, 20);
-}
-
-function getContextUsage() {
-  return {
-    model: 'Claude Sonnet 4.5',
-    tokensUsed: 38000 + Math.floor(Math.random() * 10000),
-    tokensTotal: 200000,
-    tokensRemaining: 0
-  };
-}
-
-function getModelRouterStatus() {
-  return {
-    models: [
-      { name: 'Kimi K2.5', provider: 'Moonshot AI', icon: '🌙', status: 'online', active: true },
-      { name: 'Claude Sonnet 4.5', provider: 'Anthropic', icon: '🔷', status: 'fallback', active: false },
-      { name: 'GPT-4o', provider: 'OpenRouter', icon: '🔶', status: 'fallback', active: false }
-    ],
-    routingLogic: 'Auto-failover: Kimi → Claude → OpenRouter'
-  };
-}
-
-function getRecentReports() {
-  try {
-    const files = fs.readdirSync(WORKSPACE);
-    return files
-      .filter(f => (f.endsWith('.html') || f.endsWith('.pdf') || f.endsWith('.md')) &&
-                   (f.includes('report') || f.includes('analysis') || f.includes('CRDO') || f.includes('dashboard')))
-      .map(f => {
-        const stats = fs.statSync(path.join(WORKSPACE, f));
-        let agent = 'SYSTEM', icon = '📄';
-        if (f.includes('CRDO') || f.includes('investment')) { agent = '📈 MERIDIAN'; icon = '📊'; }
-        else if (f.includes('dashboard') || f.includes('style')) { agent = '🎨 PIXEL'; icon = '🎨'; }
-        
-        return {
-          title: f.replace(/\.(html|pdf|md)$/, '').replace(/_/g, ' ').substring(0, 50),
-          date: stats.mtime.toLocaleDateString(),
-          agent: agent,
-          icon: icon,
-          url: `/workspace/${f}`,
-          modified: stats.mtime
-        };
-      })
-      .sort((a, b) => b.modified - a.modified)
-      .slice(0, 10);
-  } catch (e) {
-    return [];
-  }
-}
-
 function syncData() {
   console.log('🔄 Syncing Silph Co. data...\n');
   
@@ -322,13 +194,6 @@ function syncData() {
     }).length;
   } catch {}
   
-  // Get widget data
-  const cronJobs = getCronJobs();
-  const skills = getSkillsInventory();
-  const contextUsage = getContextUsage();
-  const modelRouter = getModelRouterStatus();
-  const recentReports = getRecentReports();
-  
   // Compile final data
   const data = {
     success: true,
@@ -345,14 +210,7 @@ function syncData() {
       memoryChecks: heartbeat.lastChecks
     },
     activityLog: activityLog,
-    systemStatus: "ONLINE",
-    widgets: {
-      cronJobs,
-      skills,
-      contextUsage,
-      modelRouter,
-      recentReports
-    }
+    systemStatus: "ONLINE"
   };
   
   // Write to output file
