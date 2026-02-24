@@ -1,4 +1,4 @@
-# 🏢 Silph Labs Command Center
+# 🏢 Silph Co. Command Center
 
 **Live Mission Control for Professor 0ak's AI Team**
 
@@ -261,6 +261,6 @@ MIT License - Feel free to use and modify!
 
 ---
 
-**Made with 🔥 by Pixel @ Silph Labs**
+**Made with 🔥 by Pixel @ Silph Co.**
 
 *"Gotta monitor 'em all!"*

@@ -1,5 +1,5 @@
 /**
- * Silph Labs Command Center - Backend API
+ * Silph Co. Command Center - Backend API
  * Serves real-time data about subagents, system metrics, and activity
  */
 
@@ -579,7 +579,7 @@ const server = app.listen(PORT, HOST, () => {
   console.log(`
 ╔══════════════════════════════════════════════════════════╗
 ║                                                          ║
-║     🏢 SILPH LABS COMMAND CENTER v1.0                    ║
+║     🏢 SILPH CO. COMMAND CENTER v1.0                    ║
 ║                                                          ║
 ║     Mission Control Server Running!                      ║
 ║                                                          ║
