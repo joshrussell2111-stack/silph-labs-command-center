@@ -333,9 +333,49 @@ function generateActivityLog() {
 }
 
 /**
+ * Load synced data from data.json (for cloud deployment)
+ */
+function loadSyncedData() {
+  try {
+    const dataPath = path.join(__dirname, 'public', 'data.json');
+    if (fs.existsSync(dataPath)) {
+      const data = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
+      return data;
+    }
+  } catch (err) {
+    console.error('Error loading synced data:', err.message);
+  }
+  return null;
+}
+
+/**
+ * Check if running on Render (cloud) vs local
+ */
+function isCloudDeployment() {
+  return process.env.RENDER === 'true' || 
+         process.env.RENDER_EXTERNAL_HOSTNAME ||
+         !fs.existsSync(WORKSPACE);
+}
+
+/**
  * Update system state (called periodically)
  */
 function updateSystemState() {
+  // If running in cloud, use synced data
+  if (isCloudDeployment()) {
+    const syncedData = loadSyncedData();
+    if (syncedData) {
+      systemState.subagents = syncedData.subagents || {};
+      systemState.metrics = syncedData.metrics || {};
+      systemState.activityLog = syncedData.activityLog || [];
+      systemState.lastUpdate = Date.now();
+      systemState.uptime += 30;
+      console.log(`[${new Date().toISOString()}] System state updated from synced data`);
+      return;
+    }
+  }
+  
+  // Local deployment - read from filesystem
   // Update subagent data
   for (const [key, agent] of Object.entries(SUBAGENTS)) {
     const activity = calculateActivityLevel(key);
@@ -359,7 +399,7 @@ function updateSystemState() {
   systemState.lastUpdate = Date.now();
   systemState.uptime += 30;
   
-  console.log(`[${new Date().toISOString()}] System state updated`);
+  console.log(`[${new Date().toISOString()}] System state updated from local files`);
 }
 
 // Initial state update
