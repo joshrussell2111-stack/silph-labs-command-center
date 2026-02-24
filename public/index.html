@@ -204,7 +204,7 @@
                     <label>Refresh Rate (seconds)</label>
                     <select id="refreshRate"><option value="5">5s</option><option value="10" selected>10s</option><option value="30">30s</option><option value="60">60s</option></select>
                 </div>
-                <div class="form-group"><label>API Server URL</label><input type="text" id="apiUrl" value="http://localhost:3001"></div>
+                <div class="form-group"><label>API Server URL (leave blank for auto)</label><input type="text" id="apiUrl" value=""></div>
                 <div class="modal-buttons">
                     <button type="submit" class="btn btn-primary">SAVE</button>
                     <button type="button" class="btn btn-secondary" onclick="closeModal('settingsModal')">CANCEL</button>
@@ -222,8 +222,12 @@
     </div>
 
     <script>
+        // Auto-detect if running on Render (production) vs local
+        const isProduction = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+        const defaultApiUrl = isProduction ? '' : 'http://localhost:3001';
+        
         const CONFIG = {
-            apiUrl: localStorage.getItem('apiUrl') || 'http://localhost:3001',
+            apiUrl: localStorage.getItem('apiUrl') || defaultApiUrl,
             refreshRate: parseInt(localStorage.getItem('refreshRate')) || 10000
         };
         let refreshInterval = null, isConnected = false;
