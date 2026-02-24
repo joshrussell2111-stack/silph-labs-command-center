@@ -359,8 +359,16 @@
             </div>
         </div>
 
+        <!-- CRON JOB MONITOR WIDGET -->
+        <div class="card" style="margin-top:20px;">
+            <h2 class="card-title">⏰ SCHEDULED TASKS (CRON JOBS)</h2>
+            <div id="cronJobsList">
+                <div class="loading">Loading scheduled tasks...</div>
+            </div>
+        </div>
+
         <footer class="footer">
-            <p>© 2026 SILPH LABS | <span style="color:var(--pokemon-gold)">PRESS START</span> TO CONTINUE</p>
+            <p>© 2026 SILPH CO. | <span style="color:var(--pokemon-gold)">PRESS START</span> TO CONTINUE</p>
             <p class="last-updated" id="lastUpdated">Last updated: Never</p>
         </footer>
     </div>
@@ -586,9 +594,31 @@
 
 
         // ========== NEW WIDGET DATA FETCHING ==========
+
+        async function loadCronJobs() {
+            try {
+                const response = await fetch('cron-jobs.json');
+                const data = await response.json();
+                const list = document.getElementById('cronJobsList');
+                
+                list.innerHTML = data.jobs.map(job => `
+                    <div style="display:flex;align-items:center;gap:12px;padding:10px;background:rgba(0,0,0,0.3);border:2px solid ${job.enabled ? 'var(--hp-green)' : 'var(--hp-red)'};margin-bottom:8px;border-radius:4px;">
+                        <span style="font-size:1.5rem;">${job.icon}</span>
+                        <div style="flex:1;">
+                            <div style="color:var(--pokemon-gold);font-weight:bold;">${job.name}</div>
+                            <div style="font-size:0.9rem;color:var(--gameboy-green);">${job.schedule}</div>
+                        </div>
+                        <span style="padding:4px 8px;border-radius:4px;font-size:0.8rem;background:${job.enabled ? 'var(--hp-green)' : 'var(--hp-red)'};color:#000;">${job.enabled ? 'ACTIVE' : 'PAUSED'}</span>
+                    </div>
+                `).join('');
+            } catch (error) {
+                document.getElementById('cronJobsList').innerHTML = '<div class="error-message">Failed to load cron jobs</div>';
+            }
+        }
         
         async function fetchAllWidgets() {
             await Promise.all([
+                loadCronJobs(),
                 fetchCronJobs(),
                 fetchSkillsInventory(),
                 fetchContextUsage(),
