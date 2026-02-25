@@ -1,7 +1,7 @@
 {
   "success": true,
-  "timestamp": "2026-02-25T17:32:33.975Z",
-  "lastSync": 1772040753975,
+  "timestamp": "2026-02-25T17:34:34.873Z",
+  "lastSync": 1772040874873,
   "subagents": {
     "pixel": {
       "name": "PIXEL",
@@ -117,7 +117,7 @@
     "gatewayStatus": "online",
     "apiLatency": 20,
     "activeAgents": 2,
-    "recentFiles": 7,
+    "recentFiles": 8,
     "lastHeartbeat": "2026-02-25T17:05:00Z",
     "memoryChecks": {
       "email": 1772039100,
@@ -205,15 +205,15 @@
       {
         "name": "data-sync",
         "schedule": "*/5 * * * *",
-        "lastRun": "2/25/2026, 12:32:33 PM",
-        "nextRun": "2/25/2026, 12:37:33 PM",
+        "lastRun": "2/25/2026, 12:34:34 PM",
+        "nextRun": "2/25/2026, 12:39:34 PM",
         "status": "active"
       }
     ],
     "skills": [],
     "contextUsage": {
       "model": "Claude Sonnet 4.5",
-      "tokensUsed": 45897,
+      "tokensUsed": 38382,
       "tokensTotal": 200000,
       "tokensRemaining": 0
     },
@@ -244,6 +244,14 @@
       "routingLogic": "Auto-failover: Kimi → Claude → OpenRouter"
     },
     "recentReports": [
+      {
+        "title": "CRDO Product Line Analysis Report",
+        "date": "2/25/2026",
+        "agent": "📈 MERIDIAN",
+        "icon": "📊",
+        "url": "/workspace/CRDO_Product_Line_Analysis_Report.md",
+        "modified": "2026-02-25T17:33:35.372Z"
+      },
       {
         "title": "crdo-report",
         "date": "2/24/2026",
@@ -315,14 +323,6 @@
         "icon": "📄",
         "url": "/workspace/nvidia_report_template.html",
         "modified": "2026-02-15T03:01:19.337Z"
-      },
-      {
-        "title": "CRDO Professional Investment Analysis",
-        "date": "2/14/2026",
-        "agent": "📈 MERIDIAN",
-        "icon": "📊",
-        "url": "/workspace/CRDO_Professional_Investment_Analysis.pdf",
-        "modified": "2026-02-15T02:37:07.926Z"
       }
     ]
   }
