@@ -1,7 +1,7 @@
 {
   "success": true,
-  "timestamp": "2026-02-26T03:37:12.135Z",
-  "lastSync": 1772077032135,
+  "timestamp": "2026-02-26T03:39:12.954Z",
+  "lastSync": 1772077152954,
   "subagents": {
     "pixel": {
       "name": "PIXEL",
@@ -75,10 +75,10 @@
       "type": "VISUALS",
       "icon": "📸",
       "description": "Image Generation, Visual Analysis, Media Processing",
-      "activityLevel": 50,
-      "status": "busy",
+      "activityLevel": 25,
+      "status": "idle",
       "lastActive": "2026-02-23",
-      "hp": 50,
+      "hp": 25,
       "maxHp": 100,
       "skillLog": {
         "entries": [
@@ -116,7 +116,7 @@
     "uptime": "09:00:00",
     "gatewayStatus": "online",
     "apiLatency": 20,
-    "activeAgents": 2,
+    "activeAgents": 1,
     "recentFiles": 15,
     "lastHeartbeat": "2026-02-26T03:23:00Z",
     "memoryChecks": {
@@ -205,15 +205,15 @@
       {
         "name": "data-sync",
         "schedule": "*/5 * * * *",
-        "lastRun": "2/25/2026, 10:37:12 PM",
-        "nextRun": "2/25/2026, 10:42:12 PM",
+        "lastRun": "2/25/2026, 10:39:12 PM",
+        "nextRun": "2/25/2026, 10:44:12 PM",
         "status": "active"
       }
     ],
     "skills": [],
     "contextUsage": {
       "model": "Claude Sonnet 4.5",
-      "tokensUsed": 40205,
+      "tokensUsed": 41230,
       "tokensTotal": 200000,
       "tokensRemaining": 0
     },
