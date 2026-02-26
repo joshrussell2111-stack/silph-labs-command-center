@@ -1,7 +1,7 @@
 {
   "success": true,
-  "timestamp": "2026-02-26T13:52:03.889Z",
-  "lastSync": 1772113923889,
+  "timestamp": "2026-02-26T13:54:04.832Z",
+  "lastSync": 1772114044832,
   "subagents": {
     "pixel": {
       "name": "PIXEL",
@@ -117,7 +117,7 @@
     "gatewayStatus": "online",
     "apiLatency": 20,
     "activeAgents": 1,
-    "recentFiles": 18,
+    "recentFiles": 19,
     "lastHeartbeat": "2026-02-26T13:04:00Z",
     "memoryChecks": {
       "email": 1772102640,
@@ -205,15 +205,15 @@
       {
         "name": "data-sync",
         "schedule": "*/5 * * * *",
-        "lastRun": "2/26/2026, 8:52:03 AM",
-        "nextRun": "2/26/2026, 8:57:03 AM",
+        "lastRun": "2/26/2026, 8:54:04 AM",
+        "nextRun": "2/26/2026, 8:59:04 AM",
         "status": "active"
       }
     ],
     "skills": [],
     "contextUsage": {
       "model": "Claude Sonnet 4.5",
-      "tokensUsed": 40590,
+      "tokensUsed": 44863,
       "tokensTotal": 200000,
       "tokensRemaining": 0
     },
@@ -244,6 +244,14 @@
       "routingLogic": "Auto-failover: Kimi → Claude → OpenRouter"
     },
     "recentReports": [
+      {
+        "title": "scout-dashboard-architecture-report",
+        "date": "2/26/2026",
+        "agent": "🎨 PIXEL",
+        "icon": "🎨",
+        "url": "/workspace/scout-dashboard-architecture-report.md",
+        "modified": "2026-02-26T13:52:41.423Z"
+      },
       {
         "title": "CRDO Optical Valuation Disconnect Analysis",
         "date": "2/25/2026",
@@ -315,14 +323,6 @@
         "icon": "🎨",
         "url": "/workspace/dashboard-styles-summary.md",
         "modified": "2026-02-24T14:06:46.012Z"
-      },
-      {
-        "title": "watchlist-analysis-2026-02-18",
-        "date": "2/18/2026",
-        "agent": "SYSTEM",
-        "icon": "📄",
-        "url": "/workspace/watchlist-analysis-2026-02-18.md",
-        "modified": "2026-02-18T19:14:49.884Z"
       }
     ]
   }
