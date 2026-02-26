@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Silph Co. Command Center - LIVE</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --pokemon-red: #CC0000; --pokemon-dark-red: #8B0000;
+            --pokemon-gold: #FFD700; --pokemon-gold-dark: #DAA520;
+            --gameboy-green: #8BAC0F; --gameboy-dark: #0F380F;
+            --gameboy-light: #9BBC0F; --pokeball-white: #FFFFFF;
+            --pokeball-black: #000000; --hp-green: #78C850;
+            --hp-yellow: #F8D030; --hp-red: #F08030;
+        }
+        body {
+            font-family: 'VT323', monospace;
+            background: linear-gradient(135deg, var(--gameboy-dark) 0%, #1a1a2e 50%, var(--pokemon-dark-red) 100%);
+            min-height: 100vh; color: var(--pokeball-white); overflow-x: hidden; position: relative;
+        }
+        body::before {
+            content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: repeating-linear-gradient(0deg, rgba(0,0,0,0.15) 0px, rgba(0,0,0,0.15) 1px, transparent 1px, transparent 2px);
+            pointer-events: none; z-index: 1000;
+        }
+        .pixel-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: linear-gradient(rgba(139,0,0,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(139,0,0,0.1) 1px, transparent 1px);
+            background-size: 20px 20px; pointer-events: none; z-index: 0;
+        }
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; position: relative; z-index: 1; }
+        .header {
+            text-align: center; padding: 30px;
+            background: linear-gradient(180deg, var(--pokemon-red) 0%, var(--pokemon-dark-red) 100%);
+            border: 4px solid var(--pokemon-gold); margin-bottom: 20px; position: relative;
+            box-shadow: 0 0 0 4px var(--pokeball-black), 0 8px 0 4px var(--pokeball-black), 0 0 20px rgba(255,215,0,0.3);
+        }
+        .header h1 {
+            font-family: 'Press Start 2P', cursive; font-size: 1.8rem; color: var(--pokemon-gold);
+            text-shadow: 3px 3px 0 var(--pokeball-black); letter-spacing: 2px;
+        }
+        .connection-status { position: absolute; top: 10px; right: 10px; display: flex; align-items: center; gap: 8px; font-size: 1rem; background: rgba(0,0,0,0.5); padding: 5px 10px; border-radius: 4px; }
+        .connection-dot { width: 10px; height: 10px; border-radius: 50%; animation: pulse 1.5s ease-in-out infinite; }
+        .connection-dot.online { background: var(--hp-green); box-shadow: 0 0 8px var(--hp-green); }
+        .connection-dot.offline { background: var(--hp-red); animation: none; }
+        .connection-dot.connecting { background: var(--hp-yellow); }
+        @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px; }
+        .card {
+            background: linear-gradient(145deg, #2a2a3e 0%, #1a1a2e 100%); border: 4px solid var(--gameboy-green);
+            padding: 20px; position: relative;
+            box-shadow: 0 0 0 2px var(--pokeball-black), 0 4px 0 2px var(--pokeball-black), inset 0 0 20px rgba(139,172,15,0.1);
+        }
+        .card-title {
+            font-family: 'Press Start 2P', cursive; font-size: 0.9rem; color: var(--pokemon-gold);
+            margin-bottom: 15px; padding-bottom: 10px; border-bottom: 3px solid var(--gameboy-green);
+            text-shadow: 2px 2px 0 var(--pokeball-black); display: flex; align-items: center; gap: 10px;
+        }
+        .card-title::before { content: '▶'; color: var(--gameboy-green); animation: blink 1s step-end infinite; }
+        @keyframes blink { 0%,50% { opacity: 1; } 51%,100% { opacity: 0; } }
+        .stat-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed rgba(139,172,15,0.3); }
+        .stat-label { color: var(--gameboy-green); }
+        .stat-value { color: var(--pokemon-gold); font-family: 'Press Start 2P'; font-size: 0.7rem; }
+        .stat-value.online { color: var(--hp-green); } .stat-value.offline { color: var(--hp-red); }
+        .pokemon-section { grid-column: span 2; }
+        .pokemon-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        .pokemon-card {
+            background: linear-gradient(180deg, rgba(139,172,15,0.1) 0%, rgba(15,56,15,0.3) 100%);
+            border: 3px solid var(--gameboy-green); padding: 15px; transition: all 0.2s; cursor: pointer;
+        }
+        .pokemon-card:hover { transform: translateY(-4px); border-color: var(--pokemon-gold); box-shadow: 0 4px 0 var(--pokeball-black), 0 0 15px rgba(255,215,0,0.3); }
+        .pokemon-card.offline { opacity: 0.6; border-color: var(--hp-red); }
+        .pokemon-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+        .pokemon-icon { width: 40px; height: 40px; background: var(--gameboy-dark); border: 2px solid var(--gameboy-green); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
+        .pokemon-name { font-family: 'Press Start 2P'; font-size: 0.7rem; }
+        .pokemon-type { font-size: 1rem; color: var(--gameboy-green); }
+        .hp-container { margin-top: 10px; }
+        .hp-label { display: flex; justify-content: space-between; font-size: 1rem; margin-bottom: 5px; }
+        .hp-bar-bg { height: 12px; background: var(--gameboy-dark); border: 2px solid var(--pokeball-black); position: relative; }
+        .hp-bar-fill { height: 100%; transition: width 0.5s ease; }
+        .hp-high { background: var(--hp-green); } .hp-medium { background: var(--hp-yellow); } .hp-low { background: var(--hp-red); }
+        .status-indicator { width: 8px; height: 8px; border-radius: 50%; margin-left: auto; animation: pulse 1.5s ease-in-out infinite; }
+        .status-active { background: var(--hp-green); box-shadow: 0 0 5px var(--hp-green); }
+        .status-busy { background: var(--hp-yellow); box-shadow: 0 0 5px var(--hp-yellow); }
+        .status-idle { background: var(--hp-red); box-shadow: 0 0 5px var(--hp-red); }
+        .status-offline { background: #666; animation: none; }
+        .mission-log { max-height: 300px; overflow-y: auto; }
+        .mission-log::-webkit-scrollbar { width: 8px; }
+        .mission-log::-webkit-scrollbar-track { background: var(--gameboy-dark); }
+        .mission-log::-webkit-scrollbar-thumb { background: var(--gameboy-green); border: 2px solid var(--pokeball-black); }
+        .log-entry { background: rgba(0,0,0,0.3); border: 2px solid var(--gameboy-green); padding: 12px; margin-bottom: 10px; position: relative; font-size: 1.1rem; animation: slideIn 0.3s ease; }
+        .log-entry::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--gameboy-green); }
+        .log-time { color: var(--pokemon-gold); font-size: 0.9rem; display: block; margin-bottom: 5px; }
+        @keyframes slideIn { from { transform: translateX(-20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        .inventory-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        .menu-btn {
+            background: linear-gradient(180deg, var(--gameboy-light) 0%, var(--gameboy-green) 100%);
+            border: 3px solid var(--pokeball-black); padding: 12px; font-family: 'VT323', monospace;
+            font-size: 1.2rem; color: var(--gameboy-dark); cursor: pointer; transition: all 0.1s;
+            text-align: left; display: flex; align-items: center; gap: 8px;
+        }
+        .menu-btn:hover { background: linear-gradient(180deg, var(--pokemon-gold) 0%, var(--pokemon-gold-dark) 100%); transform: translateY(-2px); box-shadow: 0 4px 0 var(--pokeball-black); }
+        .menu-btn::before { content: '▶'; opacity: 0; transition: opacity 0.1s; }
+        .menu-btn:hover::before { opacity: 1; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center; }
+        .modal.active { display: flex; }
+        .modal-content { background: linear-gradient(145deg, #2a2a3e 0%, #1a1a2e 100%); border: 4px solid var(--pokemon-gold); padding: 30px; max-width: 500px; width: 90%; box-shadow: 0 0 0 4px var(--pokeball-black), 0 0 30px rgba(255,215,0,0.3); }
+        .modal-title { font-family: 'Press Start 2P'; font-size: 1rem; color: var(--pokemon-gold); margin-bottom: 20px; text-align: center; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; color: var(--gameboy-green); margin-bottom: 5px; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px; font-family: 'VT323', monospace; font-size: 1.2rem; background: var(--gameboy-dark); border: 2px solid var(--gameboy-green); color: var(--pokeball-white); }
+        .modal-buttons { display: flex; gap: 10px; justify-content: center; margin-top: 20px; }
+        .btn { padding: 12px 24px; font-family: 'Press Start 2P'; font-size: 0.7rem; cursor: pointer; border: 3px solid var(--pokeball-black); }
+        .btn-primary { background: var(--pokemon-red); color: var(--pokeball-white); }
+        .btn-primary:hover { background: var(--pokemon-gold); color: var(--gameboy-dark); }
+        .btn-secondary { background: var(--gameboy-green); color: var(--gameboy-dark); }
+        .loading { display: flex; justify-content: center; align-items: center; height: 100px; font-size: 1.5rem; color: var(--gameboy-green); }
+        .loading::after { content: ''; width: 20px; height: 20px; border: 3px solid var(--gameboy-green); border-top-color: transparent; border-radius: 50%; margin-left: 10px; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .error-message { background: rgba(204,0,0,0.3); border: 2px solid var(--hp-red); padding: 15px; text-align: center; }
+        .footer { text-align: center; padding: 20px; margin-top: 20px; color: var(--gameboy-green); font-size: 1rem; opacity: 0.7; }
+        .last-updated { font-size: 0.8rem; color: rgba(139,172,15,0.6); margin-top: 5px; }
+
+        /* ========== NEW WIDGET STYLES ========== */
+        
+        /* 1. Cron Job Monitor Widget */
+        .cron-job-item {
+            background: rgba(0,0,0,0.3); border: 2px solid var(--gameboy-green);
+            padding: 12px; margin-bottom: 10px; display: flex; align-items: center;
+            gap: 12px; transition: all 0.2s;
+        }
+        .cron-job-item:hover { border-color: var(--pokemon-gold); transform: translateX(4px); }
+        .cron-pokeball {
+            width: 32px; height: 32px; border-radius: 50%; position: relative;
+            border: 3px solid var(--pokeball-black); flex-shrink: 0;
+        }
+        .cron-pokeball.active {
+            background: linear-gradient(180deg, var(--hp-green) 0%, var(--hp-green) 48%, var(--pokeball-black) 48%, var(--pokeball-black) 52%, #fff 52%, #fff 100%);
+        }
+        .cron-pokeball.paused {
+            background: linear-gradient(180deg, var(--hp-yellow) 0%, var(--hp-yellow) 48%, var(--pokeball-black) 48%, var(--pokeball-black) 52%, #fff 52%, #fff 100%);
+        }
+        .cron-pokeball.error {
+            background: linear-gradient(180deg, var(--hp-red) 0%, var(--hp-red) 48%, var(--pokeball-black) 48%, var(--pokeball-black) 52%, #fff 52%, #fff 100%);
+        }
+        .cron-pokeball::after {
+            content: ''; position: absolute; width: 10px; height: 10px; background: #fff;
+            border: 2px solid var(--pokeball-black); border-radius: 50%;
+            top: 50%; left: 50%; transform: translate(-50%, -50%);
+        }
+        .cron-job-info { flex: 1; }
+        .cron-job-name { font-family: 'Press Start 2P'; font-size: 0.65rem; color: var(--pokemon-gold); margin-bottom: 4px; }
+        .cron-job-schedule { font-size: 0.95rem; color: var(--gameboy-green); }
+        .cron-job-times { font-size: 0.85rem; color: rgba(139,172,15,0.7); margin-top: 4px; }
+        
+        /* 2. Skills Inventory Widget */
+        .skills-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 10px; max-height: 400px; overflow-y: auto;
+        }
+        .skill-card {
+            background: linear-gradient(145deg, rgba(139,172,15,0.15) 0%, rgba(15,56,15,0.3) 100%);
+            border: 3px solid var(--gameboy-green); padding: 12px; text-align: center;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .skill-card:hover {
+            border-color: var(--pokemon-gold); transform: translateY(-3px);
+            box-shadow: 0 4px 0 var(--pokeball-black), 0 0 15px rgba(255,215,0,0.2);
+        }
+        .skill-icon {
+            width: 48px; height: 48px; background: var(--gameboy-dark);
+            border: 2px solid var(--gameboy-green); border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.8rem; margin: 0 auto 8px;
+        }
+        .skill-name {
+            font-family: 'Press Start 2P'; font-size: 0.6rem; color: var(--pokemon-gold);
+            margin-bottom: 6px; line-height: 1.4;
+        }
+        .skill-category {
+            font-size: 0.85rem; color: var(--gameboy-green);
+            background: rgba(139,172,15,0.15); padding: 2px 6px; border-radius: 4px; display: inline-block;
+        }
+        .skill-agent { font-size: 0.75rem; color: rgba(139,172,15,0.6); margin-top: 6px; }
+        
+        /* 3. Context Usage Widget */
+        .context-widget { background: rgba(0,0,0,0.2); border: 3px solid var(--pokemon-gold); padding: 15px; }
+        .context-header {
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;
+        }
+        .context-model { font-family: 'Press Start 2P'; font-size: 0.7rem; color: var(--pokemon-gold); }
+        .context-model-badge {
+            background: linear-gradient(135deg, var(--pokemon-red) 0%, var(--pokemon-dark-red) 100%);
+            padding: 4px 10px; border-radius: 4px; border: 2px solid var(--pokemon-gold);
+        }
+        .context-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px; }
+        .context-stat-box { background: rgba(0,0,0,0.3); border: 2px solid var(--gameboy-green); padding: 10px; text-align: center; }
+        .context-stat-value { font-family: 'Press Start 2P'; font-size: 0.9rem; color: var(--pokemon-gold); display: block; }
+        .context-stat-label { font-size: 0.85rem; color: var(--gameboy-green); margin-top: 4px; }
+        .token-bar-container {
+            background: var(--gameboy-dark); border: 3px solid var(--pokeball-black);
+            height: 24px; position: relative; margin-top: 10px;
+        }
+        .token-bar-fill { height: 100%; transition: width 0.5s ease; position: relative; }
+        .token-bar-fill::after {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: repeating-linear-gradient(90deg, transparent, transparent 8px, rgba(0,0,0,0.2) 8px, rgba(0,0,0,0.2) 16px);
+        }
+        .token-bar-fill.safe { background: linear-gradient(180deg, var(--hp-green) 0%, #5a9a30 100%); }
+        .token-bar-fill.warning { background: linear-gradient(180deg, var(--hp-yellow) 0%, #d4b020 100%); }
+        .token-bar-fill.critical { background: linear-gradient(180deg, var(--hp-red) 0%, #d06020 100%); }
+        .token-percentage {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            font-family: 'Press Start 2P'; font-size: 0.65rem; color: var(--pokeball-white);
+            text-shadow: 2px 2px 0 var(--pokeball-black); z-index: 1;
+        }
+        
+        /* 4. Model Router Status Widget */
+        .router-chain { display: flex; flex-direction: column; gap: 10px; }
+        .router-item {
+            display: flex; align-items: center; gap: 12px; background: rgba(0,0,0,0.2);
+            border: 2px solid var(--gameboy-green); padding: 12px; position: relative;
+        }
+        .router-item.active {
+            border-color: var(--pokemon-gold); background: linear-gradient(90deg, rgba(255,215,0,0.1) 0%, rgba(0,0,0,0.2) 100%);
+            box-shadow: 0 0 15px rgba(255,215,0,0.2);
+        }
+        .router-item.active::before {
+            content: '▶'; position: absolute; left: -4px; color: var(--pokemon-gold);
+            animation: blink 1s step-end infinite;
+        }
+        .router-rank { font-family: 'Press Start 2P'; font-size: 0.6rem; color: var(--gameboy-green); width: 30px; text-align: center; }
+        .router-icon {
+            width: 40px; height: 40px; background: var(--gameboy-dark);
+            border: 2px solid var(--gameboy-green); border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; font-size: 1.3rem;
+        }
+        .router-item.active .router-icon { border-color: var(--pokemon-gold); background: var(--pokemon-gold); }
+        .router-info { flex: 1; }
+        .router-name { font-family: 'Press Start 2P'; font-size: 0.65rem; color: var(--pokemon-gold); }
+        .router-provider { font-size: 0.9rem; color: var(--gameboy-green); }
+        .router-status {
+            padding: 4px 10px; border-radius: 4px; font-size: 0.75rem; font-family: 'Press Start 2P';
+        }
+        .router-status.online { background: var(--hp-green); color: var(--gameboy-dark); }
+        .router-status.fallback { background: var(--hp-yellow); color: var(--gameboy-dark); }
+        .router-status.offline { background: var(--hp-red); color: var(--pokeball-white); }
+        .router-arrow { text-align: center; color: var(--gameboy-green); font-size: 1.2rem; margin: -5px 0; }
+        .routing-logic {
+            margin-top: 15px; padding: 10px; background: rgba(139,172,15,0.1);
+            border: 2px dashed var(--gameboy-green); font-size: 0.9rem;
+            color: var(--gameboy-green); text-align: center;
+        }
+        
+        /* 5. Recent Reports Widget */
+        .reports-list { display: flex; flex-direction: column; gap: 10px; max-height: 350px; overflow-y: auto; }
+        .report-item {
+            display: flex; align-items: center; gap: 12px; background: rgba(0,0,0,0.2);
+            border: 2px solid var(--gameboy-green); padding: 12px; cursor: pointer; transition: all 0.2s;
+        }
+        .report-item:hover {
+            border-color: var(--pokemon-gold); transform: translateX(5px); background: rgba(255,215,0,0.05);
+        }
+        .report-icon {
+            width: 48px; height: 48px; background: var(--gameboy-dark);
+            border: 2px solid var(--gameboy-green); display: flex; align-items: center;
+            justify-content: center; font-size: 1.5rem; flex-shrink: 0;
+        }
+        .report-info { flex: 1; min-width: 0; }
+        .report-title {
+            font-family: 'Press Start 2P'; font-size: 0.65rem; color: var(--pokemon-gold);
+            margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .report-meta { display: flex; gap: 12px; font-size: 0.85rem; color: var(--gameboy-green); }
+        .report-agent { background: rgba(139,172,15,0.2); padding: 2px 6px; border-radius: 4px; }
+        .report-actions { display: flex; gap: 6px; }
+        .report-btn {
+            background: var(--gameboy-green); border: 2px solid var(--pokeball-black);
+            padding: 6px 10px; font-family: 'VT323'; font-size: 0.9rem;
+            color: var(--gameboy-dark); cursor: pointer; transition: all 0.1s;
+        }
+        .report-btn:hover { background: var(--pokemon-gold); transform: translateY(-2px); }
+        .report-btn.view { background: var(--pokemon-gold); }
+
+        @media (max-width: 768px) { .header h1 { font-size: 1.2rem; } .pokemon-section { grid-column: span 1; } .pokemon-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <div class="pixel-bg"></div>
+    <div class="container">
+        <header class="header">
+            <div class="connection-status">
+                <span id="connectionText">Connecting...</span>
+                <div id="connectionDot" class="connection-dot connecting"></div>
+            </div>
+            <div style="width:80px;height:80px;margin:0 auto 15px;position:relative;animation:wobble 3s ease-in-out infinite;">
+                <div style="position:absolute;width:100%;height:100%;background:linear-gradient(180deg,#CC0000 0%,#CC0000 48%,#000 48%,#000 52%,#FFF 52%,#FFF 100%);border-radius:50%;border:4px solid #000;"></div>
+                <div style="position:absolute;width:24px;height:24px;background:#FFF;border:4px solid #000;border-radius:50%;top:50%;left:50%;transform:translate(-50%,-50%);"></div>
+            </div>
+            <h1>SILPH LABS COMMAND CENTER</h1>
+            <div style="font-size:1.4rem;color:var(--gameboy-green);margin-top:10px;text-shadow:2px 2px 0 #000;">Mission Control v3.0 - LIVE DATA + NEW WIDGETS</div>
+        </header>
+
+        <div class="dashboard-grid">
+            <div class="card">
+                <h2 class="card-title">SYSTEM STATUS</h2>
+                <div id="systemPanel"><div class="loading">Loading...</div></div>
+            </div>
+            <div class="card pokemon-section">
+                <h2 class="card-title">ACTIVE POKéMON (SUBAGENTS)</h2>
+                <div class="pokemon-grid" id="pokemonGrid"><div class="loading">Loading agents...</div></div>
+            </div>
+            <div class="card">
+                <h2 class="card-title">MISSION LOG</h2>
+                <div class="mission-log" id="missionLog"><div class="loading">Loading activity...</div></div>
+            </div>
+
+            <!-- NEW WIDGET 1: Cron Job Monitor -->
+            <div class="card">
+                <h2 class="card-title">⏰ CRON JOBS</h2>
+                <div id="cronJobsPanel"><div class="loading">Loading...</div></div>
+            </div>
+
+            <!-- NEW WIDGET 2: Skills Inventory -->
+            <div class="card">
+                <h2 class="card-title">🎒 SKILLS INVENTORY</h2>
+                <div class="skills-grid" id="skillsGrid"><div class="loading">Loading...</div></div>
+            </div>
+
+            <!-- NEW WIDGET 3: Context Usage -->
+            <div class="card">
+                <h2 class="card-title">🧠 CONTEXT USAGE</h2>
+                <div id="contextUsagePanel"><div class="loading">Loading...</div></div>
+            </div>
+
+            <!-- NEW WIDGET 4: Model Router Status -->
+            <div class="card">
+                <h2 class="card-title">🤖 MODEL ROUTER</h2>
+                <div id="modelRouterPanel"><div class="loading">Loading...</div></div>
+            </div>
+
+            <!-- NEW WIDGET 5: Recent Reports -->
+            <div class="card">
+                <h2 class="card-title">📊 RECENT REPORTS</h2>
+                <div class="reports-list" id="recentReportsPanel"><div class="loading">Loading...</div></div>
+            </div>
+            <div class="card">
+                <h2 class="card-title">QUICK ACTIONS</h2>
+                <div class="inventory-grid">
+                    <button class="menu-btn" onclick="openModal('spawnModal')"><span>🆕</span> Spawn Agent</button>
+                    <button class="menu-btn" onclick="viewReports()"><span>📊</span> View Reports</button>
+                    <button class="menu-btn" onclick="runHealthCheck()"><span>🏥</span> System Check</button>
+                    <button class="menu-btn" onclick="openModal('settingsModal')"><span>⚙️</span> Settings</button>
+                    <button class="menu-btn" onclick="forceRefresh()"><span>🔄</span> Refresh</button>
+                    <button class="menu-btn" onclick="window.open(CONFIG.apiUrl + '/api/status', '_blank')"><span>📡</span> API</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- CRON JOB MONITOR WIDGET -->
+        <div class="card" style="margin-top:20px;">
+            <h2 class="card-title">⏰ SCHEDULED TASKS (CRON JOBS)</h2>
+            <div id="cronJobsList">
+                <div class="loading">Loading scheduled tasks...</div>
+            </div>
+        </div>
+
+        <footer class="footer">
+            <p>© 2026 SILPH CO. | <span style="color:var(--pokemon-gold)">PRESS START</span> TO CONTINUE</p>
+            <p class="last-updated" id="lastUpdated">Last updated: Never</p>
+        </footer>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal" id="spawnModal">
+        <div class="modal-content">
+            <h3 class="modal-title">SPAWN NEW AGENT</h3>
+            <form id="spawnForm">
+                <div class="form-group"><label>Agent Name</label><input type="text" id="agentName" placeholder="e.g., NOVA" required></div>
+                <div class="form-group">
+                    <label>Agent Type</label>
+                    <select id="agentType" required>
+                        <option value="RESEARCH">RESEARCH</option><option value="FINANCE">FINANCE</option>
+                        <option value="WEB DESIGN">WEB DESIGN</option><option value="VISUALS">VISUALS</option>
+                        <option value="MODEL INTEL">MODEL INTEL</option><option value="CUSTOM">CUSTOM</option>
+                    </select>
+                </div>
+                <div class="form-group"><label>Description</label><textarea id="agentDesc" rows="3" placeholder="What does this agent do?"></textarea></div>
+                <div class="modal-buttons">
+                    <button type="submit" class="btn btn-primary">SPAWN</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('spawnModal')">CANCEL</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <h3 class="modal-title">SYSTEM SETTINGS</h3>
+            <form id="settingsForm">
+                <div class="form-group">
+                    <label>Refresh Rate (seconds)</label>
+                    <select id="refreshRate"><option value="5">5s</option><option value="10" selected>10s</option><option value="30">30s</option><option value="60">60s</option></select>
+                </div>
+                <div class="form-group"><label>API Server URL (leave blank for auto)</label><input type="text" id="apiUrl" value=""></div>
+                <div class="modal-buttons">
+                    <button type="submit" class="btn btn-primary">SAVE</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('settingsModal')">CANCEL</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal" id="reportsModal">
+        <div class="modal-content" style="max-width:700px">
+            <h3 class="modal-title">AVAILABLE REPORTS</h3>
+            <div id="reportsList"><div class="loading">Loading...</div></div>
+            <div class="modal-buttons"><button type="button" class="btn btn-secondary" onclick="closeModal('reportsModal')">CLOSE</button></div>
+        </div>
+    </div>
+
+    <script>
+        // Auto-detect if running on Render (production) vs local
+        const isProduction = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+        const defaultApiUrl = isProduction ? '' : 'http://localhost:3001';
+        
+        const CONFIG = {
+            apiUrl: localStorage.getItem('apiUrl') || defaultApiUrl,
+            refreshRate: parseInt(localStorage.getItem('refreshRate')) || 10000
+        };
+        let refreshInterval = null, isConnected = false;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('apiUrl').value = CONFIG.apiUrl;
+            document.getElementById('refreshRate').value = CONFIG.refreshRate / 1000;
+            fetchData();
+            startAutoRefresh();
+            document.getElementById('spawnForm').addEventListener('submit', handleSpawnAgent);
+            document.getElementById('settingsForm').addEventListener('submit', handleSaveSettings);
+        });
+
+        function startAutoRefresh() {
+            if (refreshInterval) clearInterval(refreshInterval);
+            refreshInterval = setInterval(fetchData, CONFIG.refreshRate);
+        }
+
+        async function fetchData() {
+            try {
+                const response = await fetch(`${CONFIG.apiUrl}/api/status`);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const result = await response.json();
+                if (result.success) {
+                    updateConnectionStatus(true);
+                    renderSystemPanel(result.data.metrics);
+                    renderPokemonGrid(result.data.subagents);
+                    renderMissionLog(result.data.activityLog);
+                    fetchAllWidgets();
+                    document.getElementById('lastUpdated').textContent = 'Last updated: ' + new Date().toLocaleTimeString();
+                }
+            } catch (error) {
+                console.error('Fetch error:', error);
+                updateConnectionStatus(false);
+            }
+        }
+
+        function updateConnectionStatus(connected) {
+            isConnected = connected;
+            const dot = document.getElementById('connectionDot');
+            const text = document.getElementById('connectionText');
+            dot.className = 'connection-dot ' + (connected ? 'online' : 'offline');
+            text.textContent = connected ? 'LIVE' : 'OFFLINE';
+        }
+
+        function renderSystemPanel(metrics) {
+            document.getElementById('systemPanel').innerHTML = `
+                <div style="background:rgba(139,172,15,0.05);border:3px solid var(--gameboy-green);padding:15px;">
+                    <div style="display:flex;align-items:center;gap:10px;margin-bottom:15px;padding-bottom:10px;border-bottom:2px dashed var(--gameboy-green);">
+                        <div style="width:30px;height:30px;background:var(--gameboy-green);border:3px solid var(--pokeball-black);border-radius:50%;animation:blinkLight 2s ease-in-out infinite;"></div>
+                        <span style="font-family:'Press Start 2P';font-size:0.7rem;color:var(--gameboy-green);">POKéDEX DATA</span>
+                    </div>
+                    <div class="stat-row"><span class="stat-label">System Status:</span><span class="stat-value ${metrics.gatewayStatus === 'online' ? 'online' : 'offline'}">${metrics.gatewayStatus === 'online' ? 'ONLINE ✓' : 'OFFLINE ✗'}</span></div>
+                    <div class="stat-row"><span class="stat-label">Active Agents:</span><span class="stat-value">${metrics.activeAgents}/5</span></div>
+                    <div class="stat-row"><span class="stat-label">API Latency:</span><span class="stat-value">${metrics.apiLatency}ms</span></div>
+                    <div class="stat-row"><span class="stat-label">Uptime:</span><span class="stat-value">${metrics.uptime}</span></div>
+                    <div class="stat-row"><span class="stat-label">Recent Files:</span><span class="stat-value">${metrics.recentFiles}</span></div>
+                </div>`;
+        }
+
+        function renderPokemonGrid(subagents) {
+            const grid = document.getElementById('pokemonGrid');
+            grid.innerHTML = Object.entries(subagents).map(([key, agent]) => {
+                const hpClass = agent.hp >= 70 ? 'hp-high' : agent.hp >= 40 ? 'hp-medium' : 'hp-low';
+                return `
+                <div class="pokemon-card ${agent.status === 'offline' ? 'offline' : ''}" onclick="viewAgentDetails('${key}')">
+                    <div class="pokemon-header">
+                        <div class="pokemon-icon">${agent.icon}</div>
+                        <div><div class="pokemon-name">${agent.name}</div><div class="pokemon-type">${agent.type}</div></div>
+                        <span class="status-indicator status-${agent.status}"></span>
+                    </div>
+                    <div class="hp-container">
+                        <div class="hp-label"><span class="hp-text">ACTIVITY</span><span class="hp-value">${agent.hp}/100</span></div>
+                        <div class="hp-bar-bg"><div class="hp-bar-fill ${hpClass}" style="width:${agent.hp}%"></div></div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function renderMissionLog(log) {
+            const container = document.getElementById('missionLog');
+            if (!log || log.length === 0) {
+                container.innerHTML = '<div style="padding:20px;text-align:center;color:var(--gameboy-green)">No recent activity</div>';
+                return;
+            }
+            container.innerHTML = log.slice(0, 10).map(entry => `
+                <div class="log-entry ${entry.type || ''}">
+                    <span class="log-time">[${entry.time}]</span>
+                    <span class="log-agent">${entry.icon || '🔹'} ${entry.agent}</span>
+                    <div class="log-text">${entry.text}</div>
+                </div>
+            `).join('');
+        }
+
+        function openModal(id) { document.getElementById(id).classList.add('active'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+        async function handleSpawnAgent(e) {
+            e.preventDefault();
+            const name = document.getElementById('agentName').value;
+            const type = document.getElementById('agentType').value;
+            const desc = document.getElementById('agentDesc').value;
+            try {
+                const response = await fetch(`${CONFIG.apiUrl}/api/actions/spawn`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, type, description: desc })
+                });
+                const result = await response.json();
+                if (result.success) {
+                    alert(`Agent ${name.toUpperCase()} spawned successfully!`);
+                    closeModal('spawnModal');
+                    fetchData();
+                } else {
+                    alert('Error: ' + result.error);
+                }
+            } catch (error) {
+                alert('Failed to spawn agent: ' + error.message);
+            }
+        }
+
+        function handleSaveSettings(e) {
+            e.preventDefault();
+            CONFIG.apiUrl = document.getElementById('apiUrl').value;
+            CONFIG.refreshRate = parseInt(document.getElementById('refreshRate').value) * 1000;
+            localStorage.setItem('apiUrl', CONFIG.apiUrl);
+            localStorage.setItem('refreshRate', CONFIG.refreshRate);
+            closeModal('settingsModal');
+            startAutoRefresh();
+            fetchData();
+        }
+
+        async function viewReports() {
+            openModal('reportsModal');
+            try {
+                const response = await fetch(`${CONFIG.apiUrl}/api/reports`);
+                const result = await response.json();
+                const list = document.getElementById('reportsList');
+                if (result.success && result.data.length > 0) {
+                    list.innerHTML = '<div style="max-height:300px;overflow-y:auto;">' + result.data.map(r => `
+                        <div style="background:rgba(0,0,0,0.3);border:2px solid var(--gameboy-green);padding:10px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;">
+                            <div><div style="color:var(--pokemon-gold);font-weight:bold;">${r.name}</div>
+                            <div style="font-size:0.9rem;color:var(--gameboy-green);">${new Date(r.modified).toLocaleString()}</div></div>
+                            <button class="btn btn-secondary" style="padding:8px 16px;" onclick="window.open('file://${r.name}', '_blank')">VIEW</button>
+                        </div>
+                    `).join('') + '</div>';
+                } else {
+                    list.innerHTML = '<div style="text-align:center;padding:20px;">No reports found</div>';
+                }
+            } catch (error) {
+                document.getElementById('reportsList').innerHTML = '<div class="error-message">Failed to load reports</div>';
+            }
+        }
+
+        async function runHealthCheck() {
+            try {
+                const response = await fetch(`${CONFIG.apiUrl}/api/actions/health-check`, { method: 'POST' });
+                const result = await response.json();
+                alert(`Health Check: ${result.healthy ? '✓ HEALTHY' : '✗ ISSUES DETECTED'}\n\nActive Agents: ${result.checks.agents}\nGateway: ${result.checks.gateway ? 'Online' : 'Offline'}`);
+                fetchData();
+            } catch (error) {
+                alert('Health check failed: ' + error.message);
+            }
+        }
+
+
+        // ========== NEW WIDGET DATA FETCHING ==========
+
+        async function loadCronJobs() {
+            try {
+                const response = await fetch('cron-jobs.json');
+                const data = await response.json();
+                const list = document.getElementById('cronJobsList');
+                
+                list.innerHTML = data.jobs.map(job => `
+                    <div style="display:flex;align-items:center;gap:12px;padding:10px;background:rgba(0,0,0,0.3);border:2px solid ${job.enabled ? 'var(--hp-green)' : 'var(--hp-red)'};margin-bottom:8px;border-radius:4px;">
+                        <span style="font-size:1.5rem;">${job.icon}</span>
+                        <div style="flex:1;">
+                            <div style="color:var(--pokemon-gold);font-weight:bold;">${job.name}</div>
+                            <div style="font-size:0.9rem;color:var(--gameboy-green);">${job.schedule}</div>
+                        </div>
+                        <span style="padding:4px 8px;border-radius:4px;font-size:0.8rem;background:${job.enabled ? 'var(--hp-green)' : 'var(--hp-red)'};color:#000;">${job.enabled ? 'ACTIVE' : 'PAUSED'}</span>
+                    </div>
+                `).join('');
+            } catch (error) {
+                document.getElementById('cronJobsList').innerHTML = '<div class="error-message">Failed to load cron jobs</div>';
+            }
+        }
+        
+        async function fetchAllWidgets() {
+            await Promise.all([
+                loadCronJobs(),
+                fetchCronJobs(),
+                fetchSkillsInventory(),
+                fetchContextUsage(),
+                fetchModelRouter(),
+                fetchRecentReports()
+            ]);
+        }
+
+        async function fetchCronJobs() {
+            try {
+                const response = await fetch(`${CONFIG.apiUrl}/api/cron-jobs`);
+                const result = await response.json();
+                if (result.success) {
+                    renderCronJobs(result.data);
+                }
+            } catch (error) {
+                console.error('Cron jobs fetch error:', error);
+                document.getElementById('cronJobsPanel').innerHTML = '<div class="error-message">Failed to load cron jobs</div>';
+            }
+        }
+
+        async function fetchSkillsInventory() {
+            try {
+                const response = await fetch(`${CONFIG.apiUrl}/api/skills`);
+                const result = await response.json();
+                if (result.success) {
+                    renderSkillsInventory(result.data);
+                }
+            } catch (error) {
+                console.error('Skills fetch error:', error);
+                document.getElementById('skillsGrid').innerHTML = '<div class="error-message">Failed to load skills</div>';
+            }
+        }
+
+        async function fetchContextUsage() {
+            try {
+                const response = await fetch(`${CONFIG.apiUrl}/api/context-usage`);
+                const result = await response.json();
+                if (result.success) {
+                    renderContextUsage(result.data);
+                }
+            } catch (error) {
+                console.error('Context usage fetch error:', error);
+                document.getElementById('contextUsagePanel').innerHTML = '<div class="error-message">Failed to load context usage</div>';
+            }
+        }
+
+        async function fetchModelRouter() {
+            try {
+                const response = await fetch(`${CONFIG.apiUrl}/api/model-router`);
+                const result = await response.json();
+                if (result.success) {
+                    renderModelRouter(result.data);
+                }
+            } catch (error) {
+                console.error('Model router fetch error:', error);
+                document.getElementById('modelRouterPanel').innerHTML = '<div class="error-message">Failed to load model router</div>';
+            }
+        }
+
+        async function fetchRecentReports() {
+            try {
+                const response = await fetch(`${CONFIG.apiUrl}/api/recent-reports`);
+                const result = await response.json();
+                if (result.success) {
+                    renderRecentReports(result.data);
+                }
+            } catch (error) {
+                console.error('Recent reports fetch error:', error);
+                document.getElementById('recentReportsPanel').innerHTML = '<div class="error-message">Failed to load reports</div>';
+            }
+        }
+
+        // ========== WIDGET RENDER FUNCTIONS ==========
+
+        function renderCronJobs(jobs) {
+            const panel = document.getElementById('cronJobsPanel');
+            if (!jobs || jobs.length === 0) {
+                panel.innerHTML = '<div style="padding:20px;text-align:center;color:var(--gameboy-green)">No cron jobs active</div>';
+                return;
+            }
+            panel.innerHTML = jobs.map(job => `
+                <div class="cron-job-item">
+                    <div class="cron-pokeball ${job.status}"></div>
+                    <div class="cron-job-info">
+                        <div class="cron-job-name">${job.name}</div>
+                        <div class="cron-job-schedule">Schedule: ${job.schedule}</div>
+                        <div class="cron-job-times">Last: ${job.lastRun || 'Never'} | Next: ${job.nextRun || 'Calculating...'}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderSkillsInventory(skills) {
+            const grid = document.getElementById('skillsGrid');
+            if (!skills || skills.length === 0) {
+                grid.innerHTML = '<div style="padding:20px;text-align:center;color:var(--gameboy-green);grid-column:1/-1;">No skills installed</div>';
+                return;
+            }
+            grid.innerHTML = skills.map(skill => `
+                <div class="skill-card" title="${skill.description || ''}">
+                    <div class="skill-icon">${skill.icon}</div>
+                    <div class="skill-name">${skill.name}</div>
+                    <div class="skill-category">${skill.category}</div>
+                    <div class="skill-agent">${skill.agent}</div>
+                </div>
+            `).join('');
+        }
+
+        function renderContextUsage(data) {
+            const panel = document.getElementById('contextUsagePanel');
+            const percentage = Math.round((data.tokensUsed / data.tokensTotal) * 100);
+            const barClass = percentage < 60 ? 'safe' : percentage < 85 ? 'warning' : 'critical';
+            
+            panel.innerHTML = `
+                <div class="context-widget">
+                    <div class="context-header">
+                        <span class="context-model">MODEL:</span>
+                        <span class="context-model-badge">${data.model}</span>
+                    </div>
+                    <div class="context-stats">
+                        <div class="context-stat-box">
+                            <span class="context-stat-value">${data.tokensUsed.toLocaleString()}</span>
+                            <div class="context-stat-label">USED</div>
+                        </div>
+                        <div class="context-stat-box">
+                            <span class="context-stat-value">${data.tokensRemaining.toLocaleString()}</span>
+                            <div class="context-stat-label">LEFT</div>
+                        </div>
+                        <div class="context-stat-box">
+                            <span class="context-stat-value">${data.tokensTotal.toLocaleString()}</span>
+                            <div class="context-stat-label">TOTAL</div>
+                        </div>
+                    </div>
+                    <div class="token-bar-container">
+                        <div class="token-bar-fill ${barClass}" style="width:${percentage}%"></div>
+                        <span class="token-percentage">${percentage}%</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderModelRouter(data) {
+            const panel = document.getElementById('modelRouterPanel');
+            panel.innerHTML = `
+                <div class="router-chain">
+                    ${data.models.map((model, index) => `
+                        <div class="router-item ${model.active ? 'active' : ''}">
+                            <span class="router-rank">#${index + 1}</span>
+                            <div class="router-icon">${model.icon}</div>
+                            <div class="router-info">
+                                <div class="router-name">${model.name}</div>
+                                <div class="router-provider">${model.provider}</div>
+                            </div>
+                            <span class="router-status ${model.status}">${model.status.toUpperCase()}</span>
+                        </div>
+                        ${index < data.models.length - 1 ? '<div class="router-arrow">↓</div>' : ''}
+                    `).join('')}
+                </div>
+                <div class="routing-logic">${data.routingLogic}</div>
+            `;
+        }
+
+        function renderRecentReports(reports) {
+            const panel = document.getElementById('recentReportsPanel');
+            if (!reports || reports.length === 0) {
+                panel.innerHTML = '<div style="padding:20px;text-align:center;color:var(--gameboy-green)">No reports found</div>';
+                return;
+            }
+            panel.innerHTML = reports.map(report => `
+                <div class="report-item" onclick="window.open('${report.url}', '_blank')">
+                    <div class="report-icon">${report.icon}</div>
+                    <div class="report-info">
+                        <div class="report-title">${report.title}</div>
+                        <div class="report-meta">
+                            <span>${report.date}</span>
+                            <span class="report-agent">${report.agent}</span>
+                        </div>
+                    </div>
+                    <div class="report-actions">
+                        <button class="report-btn view" onclick="event.stopPropagation(); window.open('${report.url}', '_blank')">VIEW</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function forceRefresh() {
+            document.getElementById('pokemonGrid').innerHTML = '<div class="loading">Refreshing...</div>';
+            fetchData();
+        }
+
+        function viewAgentDetails(id) {
+            window.open(`${CONFIG.apiUrl}/api/subagents/${id}`, '_blank');
+        }
+
+        // Close modals on outside click
+        window.onclick = function(e) {
+            if (e.target.classList.contains('modal')) {
+                e.target.classList.remove('active');
+            }
+        }
+    </script>
+</body>
+</html>
