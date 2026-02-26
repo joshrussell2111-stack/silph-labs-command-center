@@ -1,7 +1,7 @@
 {
   "success": true,
-  "timestamp": "2026-02-26T12:45:31.991Z",
-  "lastSync": 1772109931991,
+  "timestamp": "2026-02-26T12:47:32.873Z",
+  "lastSync": 1772110052873,
   "subagents": {
     "pixel": {
       "name": "PIXEL",
@@ -205,15 +205,15 @@
       {
         "name": "data-sync",
         "schedule": "*/5 * * * *",
-        "lastRun": "2/26/2026, 7:45:31 AM",
-        "nextRun": "2/26/2026, 7:50:31 AM",
+        "lastRun": "2/26/2026, 7:47:32 AM",
+        "nextRun": "2/26/2026, 7:52:32 AM",
         "status": "active"
       }
     ],
     "skills": [],
     "contextUsage": {
       "model": "Claude Sonnet 4.5",
-      "tokensUsed": 43973,
+      "tokensUsed": 47921,
       "tokensTotal": 200000,
       "tokensRemaining": 0
     },
