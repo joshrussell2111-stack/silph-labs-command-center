@@ -1,0 +1,11 @@
+{
+  "jobs": [
+    {"name": "Cheryl Morning Digest", "schedule": "8:00 AM daily", "enabled": true, "agent": "Cheryl", "icon": "📧"},
+    {"name": "Pixel Daily Skill Hunt", "schedule": "8:00 AM daily", "enabled": true, "agent": "Pixel", "icon": "🎨"},
+    {"name": "Scout Weekly Intelligence", "schedule": "8:30 AM daily", "enabled": true, "agent": "Scout", "icon": "🕵️"},
+    {"name": "Cipher Model Intel", "schedule": "4:30 PM daily", "enabled": true, "agent": "Cipher", "icon": "🔐"},
+    {"name": "Portfolio Skill Hunt", "schedule": "2:00 PM daily", "enabled": true, "agent": "Portfolio", "icon": "📈"},
+    {"name": "Vogue Skill Hunt", "schedule": "12:00 AM daily", "enabled": true, "agent": "Vogue", "icon": "🛋️"},
+    {"name": "Cheryl End of Day", "schedule": "6:00 PM daily", "enabled": true, "agent": "Cheryl", "icon": "📧"}
+  ]
+}
